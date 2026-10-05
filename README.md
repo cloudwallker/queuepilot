@@ -2,11 +2,11 @@
 
 **Make background jobs, retries, and results easy to inspect.**
 
-QueuePilot is a small durable job backend built with **FastAPI + SQLite**. Submit text, receive a job ID immediately, and follow background summarization through a Chinese web console with a persistent event timeline. It makes idempotent submission, atomic worker claims, bounded retries, and recovery after worker interruption visible in a runnable single-machine demo.
+QueuePilot is a durable background job service built with **FastAPI + SQLite**. Submit a text summarization job, receive its ID immediately, and track its status, results, retries, and recovery events in a Chinese web console. Jobs and execution history persist on a single machine, with idempotent submission, atomic worker claims, and lease recovery.
 
-The default **deterministic mock summarizer is not an LLM**. It runs offline without an API key, Redis, or a model server. An optional adapter connects to a local Ollama instance when you want real model-generated summaries.
+The default **mock summarizer** produces deterministic summaries for offline runs. Switch to the optional **Ollama adapter** to generate summaries with a local language model.
 
-**中文简介：** QueuePilot 是基于 FastAPI 与 SQLite 的单机持久化任务后端，通过中文控制台展示幂等提交、自动重试、租约恢复和执行历史；默认 mock 可离线演示，可选接入本地 Ollama。
+**中文简介：** QueuePilot 是基于 FastAPI 与 SQLite 的持久化摘要任务服务，支持幂等提交、自动重试和租约恢复，通过中文控制台查看任务状态、结果与执行历史；默认使用离线 mock 摘要器，可选接入本地 Ollama。
 
 [English](README.md) · [完整中文文档](README_ZH.md)
 

@@ -2,11 +2,11 @@
 
 **让后台任务的排队、重试和结果都有迹可循。**
 
-QueuePilot 是一个基于 **FastAPI + SQLite** 的单机持久化任务后端：提交文本后立即获得任务 ID，Worker 在后台生成摘要，中文控制台展示状态、结果和每次执行的事件。它把幂等提交、原子认领、有限次数重试和 Worker 中断后的恢复做成了可以直接运行与观察的演示。
+QueuePilot 是基于 **FastAPI + SQLite** 的持久化摘要任务服务。提交文本后立即获得任务 ID，通过中文控制台查看后台任务的状态、结果、重试与恢复事件。任务与执行历史保存在单机数据库中，支持幂等提交、原子认领和租约恢复。
 
-默认使用确定性的 **mock 摘要器，非大模型**，无需 API 密钥、Redis 或模型服务即可离线运行。需要真实模型生成摘要时，可选接入本地 Ollama。
+默认使用 **mock 摘要器**，在离线环境中生成确定性摘要。选择 **Ollama 适配器**，即可接入本地语言模型生成摘要。
 
-**English overview:** QueuePilot is a small durable job backend built with FastAPI and SQLite. Its Chinese console makes idempotent submission, atomic worker claims, bounded retries, lease recovery, and persistent execution events visible. The default deterministic mock runs offline; a local Ollama adapter is optional.
+**English overview:** QueuePilot is a durable summarization job service built with FastAPI and SQLite. Its Chinese web console shows job status, results, retries, and recovery events, with idempotent submission, atomic worker claims, and lease recovery. The default mock summarizer runs offline; an Ollama adapter connects to a local language model.
 
 [English](README.md) · [中文](README_ZH.md)
 
