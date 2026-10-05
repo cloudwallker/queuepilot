@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "queuepilot"
+version = "0.1.0"
+description = "A small durable job backend for local AI summarization workflows"
+requires-python = ">=3.12"
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "httpx>=0.27,<1"]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "httpx2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".artifacts", ".venv", "dist", "build"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["queuepilot"]

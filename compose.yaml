@@ -1,0 +1,25 @@
+services:
+  queuepilot:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    environment:
+      QUEUEPILOT_DB: /app/data/queuepilot.db
+      QUEUEPILOT_HOST: 0.0.0.0
+      QUEUEPILOT_PORT: "8765"
+      QUEUEPILOT_PROVIDER: "${QUEUEPILOT_PROVIDER:-mock}"
+      QUEUEPILOT_API_KEY: "${QUEUEPILOT_API_KEY:-}"
+      QUEUEPILOT_WORKER_ENABLED: "${QUEUEPILOT_WORKER_ENABLED:-true}"
+      QUEUEPILOT_POLL_SECONDS: "${QUEUEPILOT_POLL_SECONDS:-0.5}"
+      QUEUEPILOT_LEASE_SECONDS: "${QUEUEPILOT_LEASE_SECONDS:-60}"
+      QUEUEPILOT_RETRY_BASE: "${QUEUEPILOT_RETRY_BASE:-2}"
+      QUEUEPILOT_OLLAMA_URL: "${QUEUEPILOT_OLLAMA_URL:-http://host.docker.internal:11434}"
+      QUEUEPILOT_OLLAMA_MODEL: "${QUEUEPILOT_OLLAMA_MODEL:-qwen3:4b}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - queuepilot-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  queuepilot-data:

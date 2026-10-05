@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="QueuePilot 本地任务控制台：提交摘要任务，查看重试、状态与执行历史。" />
+    <title>QueuePilot · 任务控制台</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%235ee9bd'/%3E%3Cpath d='M13 15h22M13 24h16M13 33h10' stroke='%230d1818' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="QueuePilot 首页">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h10M5 18h6" /></svg></span>
+        <span>QueuePilot<span class="brand-caption">LOCAL JOB ENGINE</span></span>
+      </a>
+      <nav class="header-links" aria-label="项目导航">
+        <a href="/docs" target="_blank" rel="noopener">API 文档 <span aria-hidden="true">↗</span></a>
+        <span class="connection" id="connection"><span class="connection-dot"></span><span id="connection-text">正在连接</span></span>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-line"></span> DURABLE EXECUTION, VISIBLE PROGRESS</p>
+          <h1 id="page-title">任务控制台<span class="heading-dot">.</span></h1>
+          <p class="intro-copy">提交一次，追踪每一步。让后台任务的排队、重试与结果都有迹可循。</p>
+        </div>
+        <div class="runtime-info">
+          <span class="runtime-pill" id="provider-label">读取运行配置中</span>
+          <span class="runtime-caption" id="worker-label">SQLite 持久化 · 至少一次执行</span>
+        </div>
+      </section>
+
+      <section class="access-panel" aria-label="服务连接">
+        <div class="access-copy"><span class="access-icon" aria-hidden="true">⌁</span><p><strong>访问密钥</strong><span>启用服务鉴权时填写；仅保存在当前页面内存中。</span></p></div>
+        <form id="connection-form" class="access-form">
+          <label class="sr-only" for="api-key">X-API-Key 访问密钥</label>
+          <input type="password" id="api-key" autocomplete="off" spellcheck="false" placeholder="可选，默认本机演示无需密钥" />
+          <button class="button button-quiet" type="submit">连接</button>
+        </form>
+      </section>
+      <div id="connection-error" class="notice notice-error" role="alert" hidden></div>
+
+      <section class="stats-grid" aria-label="任务统计">
+        <article class="stat-card"><div class="stat-name"><span>全部任务</span><span class="stat-symbol" aria-hidden="true">▤</span></div><strong id="stat-total">—</strong><span class="stat-foot" id="attempt-count">累计执行 — 次</span></article>
+        <article class="stat-card"><div class="stat-name"><span>等待执行</span><span class="stat-dot queued"></span></div><strong id="stat-waiting">—</strong><span class="stat-foot">排队中 + 等待重试</span></article>
+        <article class="stat-card"><div class="stat-name"><span>正在运行</span><span class="stat-dot running"></span></div><strong id="stat-running">—</strong><span class="stat-foot">Worker 已认领</span></article>
+        <article class="stat-card"><div class="stat-name"><span>已完成</span><span class="stat-dot succeeded"></span></div><strong id="stat-succeeded">—</strong><span class="stat-foot">摘要已生成</span></article>
+        <article class="stat-card"><div class="stat-name"><span>已失败</span><span class="stat-dot failed"></span></div><strong id="stat-failed">—</strong><span class="stat-foot">可手动重新排队</span></article>
+        <article class="stat-card"><div class="stat-name"><span>已取消</span><span class="stat-dot cancelled"></span></div><strong id="stat-cancelled">—</strong><span class="stat-foot">执行前终止</span></article>
+      </section>
+
+      <div class="workspace">
+        <aside class="composer-column">
+          <section class="panel composer" aria-labelledby="submit-title">
+            <div class="panel-heading"><span class="section-index">01</span><h2 id="submit-title">提交新任务</h2></div>
+            <p class="panel-description">输入一段文本，后台生成摘要。</p>
+            <form id="job-form">
+              <div class="field"><label for="job-text">待处理文本 <span class="field-optional">必填</span></label><textarea id="job-text" rows="8" maxlength="20000" required placeholder="粘贴会议记录、产品想法或文章片段……"></textarea><div class="field-hint"><span>1–20,000 字符</span><span id="character-count">0 / 20,000</span></div></div>
+              <div class="field-pair">
+                <div class="field"><label for="max-attempts">最大尝试次数</label><input id="max-attempts" type="number" min="1" max="5" value="3" required /></div>
+                <div class="field"><label for="simulate-failures">模拟失败次数</label><input id="simulate-failures" type="number" min="0" max="4" value="0" required /></div>
+              </div>
+              <p class="field-explanation" id="simulation-hint">mock 模式可模拟失败，观察自动重试。</p>
+              <details class="advanced-options"><summary>幂等设置 <span>可选</span></summary><div class="field"><label for="idempotency-key">Idempotency-Key</label><input id="idempotency-key" type="text" maxlength="128" pattern="[A-Za-z0-9._:\-]+" title="1–128 个字母、数字或 . _ : -" autocomplete="off" placeholder="例如 meeting-notes-001" /><p class="field-explanation">相同键与相同请求会返回原任务。相同键用于不同请求会发生冲突。支持 1–128 个字母、数字或 . _ : -。</p></div></details>
+              <button id="submit-button" type="submit" class="button button-primary"><span>提交任务</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></svg></button>
+            </form>
+          </section>
+
+          <section class="panel demo-panel" aria-labelledby="demo-title">
+            <div class="demo-heading"><span class="demo-icon" aria-hidden="true">▶</span><h2 id="demo-title">一分钟体验执行流程</h2></div>
+            <p>点击即提交示例任务，右侧查看实时状态和事件。</p>
+            <button class="demo-button" id="demo-success" type="button"><span><i class="stat-dot succeeded"></i>成功示例</span><span class="demo-description">一次完成 ↗</span></button>
+            <button class="demo-button" id="demo-retry" type="button"><span><i class="stat-dot retry_wait"></i>自动重试</span><span class="demo-description">先失败两次 ↗</span></button>
+            <button class="demo-button" id="demo-failed" type="button"><span><i class="stat-dot failed"></i>失败示例</span><span class="demo-description">耗尽三次尝试 ↗</span></button>
+            <p class="demo-note" id="demo-note">重试与失败示例使用确定性 mock，不调用大模型。</p>
+          </section>
+          <p class="scope-note"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="2" /><path d="M8 21h8m-4-4v4" /></svg><span>为单机学习与演示而设计。<br />任务与事件保存在本地 SQLite。</span></p>
+        </aside>
+
+        <div class="activity-column">
+          <section class="panel jobs-panel" aria-labelledby="jobs-title">
+            <div class="list-heading"><div class="panel-heading"><span class="section-index">02</span><h2 id="jobs-title">任务列表</h2><span id="list-total" class="count-label">0</span></div><div class="list-controls"><label class="sr-only" for="status-filter">按状态筛选</label><select id="status-filter"><option value="">全部状态</option><option value="queued">排队中</option><option value="running">运行中</option><option value="retry_wait">等待重试</option><option value="succeeded">已完成</option><option value="failed">已失败</option><option value="cancelled">已取消</option></select><button type="button" id="refresh-button" class="button button-icon" aria-label="刷新任务列表" title="刷新"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17" /></svg></button></div></div>
+            <div class="jobs-table-wrap"><table class="jobs-table"><thead><tr><th>任务 / 内容</th><th>状态</th><th>尝试</th><th>创建时间</th></tr></thead><tbody id="jobs-body"></tbody></table><div class="empty-state" id="jobs-empty"><div class="empty-icon" aria-hidden="true">▤</div><strong>从第一个任务开始</strong><p>提交文本，或点击左侧示例体验完整流程。</p></div></div>
+            <div class="list-footer"><span class="poll-info"><span class="tiny-dot"></span><span id="updated-time">每 2 秒自动更新</span></span><div class="pagination"><button id="previous-page" type="button" class="page-button" aria-label="上一页" disabled>‹</button><span id="page-info">1 / 1</span><button id="next-page" type="button" class="page-button" aria-label="下一页" disabled>›</button></div></div>
+          </section>
+
+          <section class="panel detail-panel" aria-labelledby="details-title">
+            <div class="detail-topline"><div class="panel-heading"><span class="section-index">03</span><h2 id="details-title">执行详情</h2></div><span class="detail-hint">选择任务查看</span></div>
+            <div class="empty-state detail-empty" id="details-empty"><div class="empty-icon" aria-hidden="true">⌁</div><strong>每次尝试，都有记录</strong><p>点击任务，查看结果、错误与完整执行时间线。</p></div>
+            <div id="details-content" hidden>
+              <div class="selected-job-header"><div><div class="job-id-line"><code id="selected-job-id"></code><button id="copy-id" class="copy-button" type="button" title="复制任务 ID" aria-label="复制任务 ID"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V4H4v12h4" /></svg></button></div><div class="job-meta" id="selected-job-meta"></div></div><span id="selected-job-status" class="status-badge"></span></div>
+              <div class="detail-grid"><div class="result-column"><div class="content-label"><span>执行结果</span><span id="result-provider"></span></div><div class="result-box" id="job-result"></div><div class="error-box" id="job-error" hidden></div><details class="source-text"><summary>原始文本</summary><p id="job-source"></p></details><dl class="job-dates"><div><dt>创建</dt><dd id="job-created"></dd></div><div><dt>更新</dt><dd id="job-updated"></dd></div><div id="job-available-row" hidden><dt>下次执行</dt><dd id="job-available"></dd></div></dl><div class="job-actions"><button id="cancel-job" class="button button-quiet" type="button" hidden>取消任务</button><button id="retry-job" class="button button-quiet" type="button" hidden>重新排队</button></div></div><div class="timeline-column"><div class="content-label"><span>事件时间线</span><span id="event-count">0 条事件</span></div><ol class="timeline" id="events-list"></ol><p class="timeline-empty" id="events-empty">暂无事件</p></div></div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <footer class="page-footer"><span>QueuePilot <span class="footer-divider">/</span> 后台执行，前台可见</span><span>FastAPI <span>·</span> SQLite <span>·</span> Python</span></footer>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
