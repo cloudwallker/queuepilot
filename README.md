@@ -225,3 +225,7 @@ The script submits three jobs and checks idempotent replay, request conflict, no
 ## Scope
 
 QueuePilot is intended for learning, local demonstrations, and reading the mechanics of a durable queue. SQLite keeps the setup small; the project makes no high-throughput or production SLA claims. It has no registration, multi-tenancy, billing, webhooks, or multi-step agents. The default configuration serves a local demo; hosting it publicly requires deployment-specific access control, TLS, and resource limits.
+
+## Interface
+
+Local job execution with readable task status, inline input feedback, visible keyboard focus, and layouts for desktop and mobile.

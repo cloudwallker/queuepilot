@@ -338,6 +338,7 @@
   }
 
   function updateButtons() {
+    get("job-form").setAttribute("aria-busy", String(state.submitting));
     get("submit-button").disabled = state.submitting;
     get("submit-button").querySelector("span").textContent = state.submitting ? "正在提交…" : "提交任务";
     get("demo-success").disabled = state.submitting;
@@ -401,12 +402,14 @@
     void refresh();
   });
   get("job-text").addEventListener("input", () => {
+    get("job-text-error").hidden = true;
+    get("job-text").removeAttribute("aria-invalid");
     write("character-count", `${get("job-text").value.length.toLocaleString("zh-CN")} / 20,000`);
   });
   get("job-form").addEventListener("submit", (event) => {
     event.preventDefault();
     const text = get("job-text").value.trim();
-    if (!text) { toast("请输入至少一个非空白字符。", true); get("job-text").focus(); return; }
+    if (!text) { get("job-text-error").textContent = "请输入至少一个非空白字符。"; get("job-text-error").hidden = false; get("job-text").setAttribute("aria-invalid", "true"); get("job-text").focus(); return; }
     void submitJob({
       text,
       max_attempts: Number(get("max-attempts").value),

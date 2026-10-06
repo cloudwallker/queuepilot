@@ -11,6 +11,7 @@
     <script src="/static/app.js" defer></script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">跳到任务工作区</a>
     <header class="topbar">
       <a class="brand" href="/" aria-label="QueuePilot 首页">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h10M5 18h6" /></svg></span>
@@ -22,7 +23,7 @@
       </nav>
     </header>
 
-    <main class="shell">
+    <main class="shell" id="main-content" tabindex="-1">
       <section class="intro" aria-labelledby="page-title">
         <div>
           <p class="eyebrow"><span class="eyebrow-line"></span> DURABLE EXECUTION, VISIBLE PROGRESS</p>
@@ -60,7 +61,7 @@
             <div class="panel-heading"><span class="section-index">01</span><h2 id="submit-title">提交新任务</h2></div>
             <p class="panel-description">输入一段文本，后台生成摘要。</p>
             <form id="job-form">
-              <div class="field"><label for="job-text">待处理文本 <span class="field-optional">必填</span></label><textarea id="job-text" rows="8" maxlength="20000" required placeholder="粘贴会议记录、产品想法或文章片段……"></textarea><div class="field-hint"><span>1–20,000 字符</span><span id="character-count">0 / 20,000</span></div></div>
+              <div class="field"><label for="job-text">待处理文本 <span class="field-optional">必填</span></label><textarea id="job-text" rows="8" maxlength="20000" required aria-describedby="text-hint job-text-error" placeholder="粘贴会议记录、产品想法或文章片段……"></textarea><div class="field-hint" id="text-hint"><span>1–20,000 字符</span><span id="character-count">0 / 20,000</span></div><p id="job-text-error" class="field-error" role="alert" hidden></p></div>
               <div class="field-pair">
                 <div class="field"><label for="max-attempts">最大尝试次数</label><input id="max-attempts" type="number" min="1" max="5" value="3" required /></div>
                 <div class="field"><label for="simulate-failures">模拟失败次数</label><input id="simulate-failures" type="number" min="0" max="4" value="0" required /></div>
@@ -85,7 +86,7 @@
         <div class="activity-column">
           <section class="panel jobs-panel" aria-labelledby="jobs-title">
             <div class="list-heading"><div class="panel-heading"><span class="section-index">02</span><h2 id="jobs-title">任务列表</h2><span id="list-total" class="count-label">0</span></div><div class="list-controls"><label class="sr-only" for="status-filter">按状态筛选</label><select id="status-filter"><option value="">全部状态</option><option value="queued">排队中</option><option value="running">运行中</option><option value="retry_wait">等待重试</option><option value="succeeded">已完成</option><option value="failed">已失败</option><option value="cancelled">已取消</option></select><button type="button" id="refresh-button" class="button button-icon" aria-label="刷新任务列表" title="刷新"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17" /></svg></button></div></div>
-            <div class="jobs-table-wrap"><table class="jobs-table"><thead><tr><th>任务 / 内容</th><th>状态</th><th>尝试</th><th>创建时间</th></tr></thead><tbody id="jobs-body"></tbody></table><div class="empty-state" id="jobs-empty"><div class="empty-icon" aria-hidden="true">▤</div><strong>从第一个任务开始</strong><p>提交文本，或点击左侧示例体验完整流程。</p></div></div>
+            <div class="jobs-table-wrap" tabindex="0" role="region" aria-label="任务列表，可左右滚动"><table class="jobs-table"><thead><tr><th>任务 / 内容</th><th>状态</th><th>尝试</th><th>创建时间</th></tr></thead><tbody id="jobs-body"></tbody></table><div class="empty-state" id="jobs-empty"><div class="empty-icon" aria-hidden="true">▤</div><strong>从第一个任务开始</strong><p>提交文本，或点击左侧示例体验完整流程。</p></div></div>
             <div class="list-footer"><span class="poll-info"><span class="tiny-dot"></span><span id="updated-time">每 2 秒自动更新</span></span><div class="pagination"><button id="previous-page" type="button" class="page-button" aria-label="上一页" disabled>‹</button><span id="page-info">1 / 1</span><button id="next-page" type="button" class="page-button" aria-label="下一页" disabled>›</button></div></div>
           </section>
 
