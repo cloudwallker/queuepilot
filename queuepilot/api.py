@@ -109,7 +109,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def list_jobs(
         status: JobStatus | None = None,
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
-        offset: Annotated[int, Query(ge=0)] = 0,
+        offset: Annotated[int, Query(ge=0, le=9223372036854775807)] = 0,
     ):
         return store.list_jobs(status, limit, offset)
 
@@ -118,7 +118,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return store.get(job_id)
 
     @router.get("/jobs/{job_id}/events")
-    def events(job_id: str, after: Annotated[int, Query(ge=0)] = 0):
+    def events(job_id: str, after: Annotated[int, Query(ge=0, le=9223372036854775807)] = 0):
         return {"items": store.events(job_id, after)}
 
     @router.post("/jobs/{job_id}/retry")

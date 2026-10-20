@@ -165,6 +165,8 @@ Invoke-RestMethod "http://127.0.0.1:8765/api/jobs/$($job.id)/events?after=0"
 | `GET /metrics` | Prometheus 文本指标 `queuepilot_jobs`、`queuepilot_attempts_total` |
 | `GET /healthz` | 数据库可读时返回 `{"status":"ok"}` |
 
+查询参数 `offset` 和 `after` 接受 `0` 至 `9223372036854775807`（SQLite 有符号 64 位整数上限）之间的整数，超出范围返回 `422`。
+
 时间戳为 **Unix 秒**。状态转换或幂等请求冲突返回 `409`，任务不存在返回 `404`，输入无效返回 `422`，鉴权失败返回 `401`，数据库暂时不可用返回 `503`。
 
 ## 为什么任务能恢复
