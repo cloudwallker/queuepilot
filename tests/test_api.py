@@ -100,6 +100,32 @@ def test_list_validates_pagination_and_status(client):
         assert client.get("/api/jobs?" + query).status_code == 422
 
 
+@pytest.mark.parametrize(
+    ("value", "status_code"),
+    [(-1, 422), (9223372036854775807, 200), (9223372036854775808, 422)],
+)
+def test_job_offset_respects_sqlite_integer_range(settings, value, status_code):
+    with TestClient(create_app(settings), raise_server_exceptions=False) as client:
+        response = client.get("/api/jobs", params={"offset": value})
+    assert response.status_code == status_code
+    if status_code == 200:
+        assert response.json()["items"] == []
+        assert response.json()["offset"] == value
+
+
+@pytest.mark.parametrize(
+    ("value", "status_code"),
+    [(-1, 422), (9223372036854775807, 200), (9223372036854775808, 422)],
+)
+def test_event_cursor_respects_sqlite_integer_range(settings, value, status_code):
+    with TestClient(create_app(settings), raise_server_exceptions=False) as client:
+        job = client.post("/api/jobs", json={"text": "Cursor boundary test"}).json()
+        response = client.get(f"/api/jobs/{job['id']}/events", params={"after": value})
+    assert response.status_code == status_code
+    if status_code == 200:
+        assert response.json() == {"items": []}
+
+
 def test_api_key_protects_business_data_and_metrics(settings):
     with TestClient(create_app(replace(settings, api_key="local-test-key"))) as client:
         assert client.get("/healthz").status_code == 200

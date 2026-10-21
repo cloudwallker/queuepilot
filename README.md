@@ -165,6 +165,8 @@ If authentication is enabled, supply your `X-API-Key` header on every business A
 | `GET /metrics` | Prometheus text metrics: `queuepilot_jobs` and `queuepilot_attempts_total` |
 | `GET /healthz` | Returns `{"status":"ok"}` when the database is readable |
 
+The `offset` and `after` query parameters accept integers from `0` through `9223372036854775807` (SQLite's signed 64-bit maximum). Values outside this range return `422`.
+
 Timestamps are **Unix seconds**. Conflicting state transitions or idempotency requests return `409`; unknown jobs return `404`; invalid input returns `422`; failed authentication returns `401`; database unavailability returns `503`.
 
 ## How recovery works
